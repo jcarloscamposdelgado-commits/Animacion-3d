@@ -3,16 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>J. Carlos Campos</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&display=swap" rel="stylesheet">
-
 <style>
-html,body{
-margin:0;
-padding:0;
-background:black;
-overflow:hidden;
-}
+html,body{margin:0;padding:0;background:black;overflow:hidden;}
 canvas{display:block;}
 </style>
 </head>
@@ -20,12 +13,12 @@ canvas{display:block;}
 <canvas id="c"></canvas>
 
 <script>
-const canvas = document.getElementById("c");
-const ctx = canvas.getContext("2d");
+const canvas=document.getElementById("c");
+const ctx=canvas.getContext("2d");
 let w,h;
 function resize(){
-  w = canvas.width = window.innerWidth;
-  h = canvas.height = window.innerHeight;
+  w=canvas.width=window.innerWidth;
+  h=canvas.height=window.innerHeight;
 }
 window.addEventListener("resize",resize);
 resize();
@@ -34,9 +27,9 @@ let t=0;
 let textAlpha=0;
 let textScale=0.6;
 
-// Partículas
+// partículas
 const particles=[];
-for(let i=0;i<600;i++){
+for(let i=0;i<500;i++){
   particles.push({
     a:Math.random()*Math.PI*2,
     r:Math.random()*Math.min(w,h)/2,
@@ -45,7 +38,7 @@ for(let i=0;i<600;i++){
   });
 }
 
-// Notas musicales
+// notas musicales
 const notes=["♪","♫","♩","♬"];
 const musicNotes=[];
 for(let i=0;i<40;i++){
@@ -57,6 +50,9 @@ for(let i=0;i<40;i++){
     char:notes[Math.floor(Math.random()*notes.length)]
   });
 }
+
+// animación claves
+let clefPhase=0;
 
 function drawSpotlights(){
   for(let i=0;i<3;i++){
@@ -128,18 +124,34 @@ function drawText(){
   const mainFont=Math.floor(w*0.06);
   const subFont=Math.floor(w*0.028);
 
-  // claves animadas
-  const offset=300+Math.sin(t*0.01)*20;
   ctx.font=mainFont+"px Cinzel";
-  ctx.fillText("𝄞",-offset,-20);
-  ctx.fillText("𝄞",offset,-20);
-
-  // nombre
   ctx.fillText("J. CARLOS CAMPOS",0,-20);
 
   ctx.font=subFont+"px Cinzel";
   ctx.shadowBlur=20;
   ctx.fillText("Compositor & Letrista",0,50);
+
+  ctx.restore();
+}
+
+function drawClefs(){
+  clefPhase+=0.01;
+  const cycle=Math.sin(clefPhase);
+  const alpha=Math.max(0,cycle);
+  const offset=350;
+
+  ctx.save();
+  ctx.translate(w/2,h/2);
+  ctx.globalAlpha=alpha;
+  ctx.shadowColor="#ffd700";
+  ctx.shadowBlur=30;
+  ctx.fillStyle="#d4af37";
+  ctx.font=Math.floor(w*0.06)+"px Cinzel";
+
+  const slide=200*(1-alpha);
+
+  ctx.fillText("𝄞",-offset-slide,-20);
+  ctx.fillText("𝄞", offset+slide,-20);
 
   ctx.restore();
 }
@@ -153,6 +165,7 @@ function animate(){
   drawParticles();
   drawMusicNotes();
   drawText();
+  drawClefs();
 
   t++;
   requestAnimationFrame(animate);
