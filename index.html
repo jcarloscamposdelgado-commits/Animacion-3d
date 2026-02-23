@@ -72,7 +72,7 @@ function drawSpotlights(){
 function drawLensFlare(){
   const r=200+Math.sin(t*0.01)*50;
   const g=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,r);
-  g.addColorStop(0,"rgba(255,255,200,0.35)");
+  g.addColorStop(0,"rgba(255,255,255,0.35)");
   g.addColorStop(0.3,"rgba(255,215,100,0.15)");
   g.addColorStop(1,"rgba(0,0,0,0)");
   ctx.fillStyle=g;
@@ -116,10 +116,12 @@ function drawText(){
   ctx.globalAlpha=textAlpha;
   ctx.textAlign="center";
 
-  const glow=30+Math.sin(t*0.05)*10;
-  ctx.shadowColor="#ffd700";
+  const glow=20+Math.sin(t*0.05)*5;
+
+  // TEXTO BLANCO PROTAGONISTA
+  ctx.shadowColor="white";
   ctx.shadowBlur=glow;
-  ctx.fillStyle="#d4af37";
+  ctx.fillStyle="white";
 
   const mainFont=Math.floor(w*0.06);
   const subFont=Math.floor(w*0.028);
@@ -128,7 +130,7 @@ function drawText(){
   ctx.fillText("J. CARLOS CAMPOS",0,-20);
 
   ctx.font=subFont+"px Cinzel";
-  ctx.shadowBlur=20;
+  ctx.shadowBlur=10;
   ctx.fillText("Compositor & Letrista",0,50);
 
   ctx.restore();
