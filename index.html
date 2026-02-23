@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>J. Carlos Campos</title>
 
-<!-- Fuente cinematográfica -->
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&display=swap" rel="stylesheet">
 
 <style>
@@ -14,9 +13,7 @@ padding:0;
 background:black;
 overflow:hidden;
 }
-canvas{
-display:block;
-}
+canvas{display:block;}
 </style>
 </head>
 <body>
@@ -33,71 +30,114 @@ function resize(){
 window.addEventListener("resize",resize);
 resize();
 
-let time = 0;
+let t=0;
+let textAlpha=0;
+let textScale=0.6;
 
-// Partículas en espiral
+// Partículas
 const particles=[];
-const count=500;
-
-for(let i=0;i<count;i++){
+for(let i=0;i<600;i++){
   particles.push({
-    angle: Math.random()*Math.PI*2,
-    radius: Math.random()*Math.min(w,h)/2,
-    speed: 0.001 + Math.random()*0.002,
-    size: Math.random()*2+0.5
+    a:Math.random()*Math.PI*2,
+    r:Math.random()*Math.min(w,h)/2,
+    s:0.001+Math.random()*0.002,
+    size:Math.random()*2+0.5
   });
 }
 
-// Animación texto
-let textAlpha = 0;
-let textScale = 0.8;
+// Notas musicales
+const notes=["♪","♫","♩","♬"];
+const musicNotes=[];
+for(let i=0;i<40;i++){
+  musicNotes.push({
+    x:Math.random()*w,
+    y:h+Math.random()*h,
+    speed:0.3+Math.random()*0.7,
+    size:20+Math.random()*30,
+    char:notes[Math.floor(Math.random()*notes.length)]
+  });
+}
 
 function drawSpotlights(){
   for(let i=0;i<3;i++){
-    const x = w/2 + Math.sin(time*0.001+i*2)*400;
-    const y = h/2 + Math.cos(time*0.001+i*2)*200;
-
-    const grd = ctx.createRadialGradient(x,y,0,x,y,500);
-    grd.addColorStop(0,"rgba(255,215,100,0.25)");
-    grd.addColorStop(0.4,"rgba(255,200,50,0.1)");
-    grd.addColorStop(1,"rgba(0,0,0,0)");
-    ctx.fillStyle = grd;
+    const x=w/2+Math.sin(t*0.001+i)*400;
+    const y=h/2+Math.cos(t*0.001+i)*200;
+    const g=ctx.createRadialGradient(x,y,0,x,y,500);
+    g.addColorStop(0,"rgba(255,215,120,0.25)");
+    g.addColorStop(0.4,"rgba(255,200,50,0.1)");
+    g.addColorStop(1,"rgba(0,0,0,0)");
+    ctx.fillStyle=g;
     ctx.beginPath();
     ctx.arc(x,y,500,0,Math.PI*2);
     ctx.fill();
   }
 }
 
+function drawLensFlare(){
+  const r=200+Math.sin(t*0.01)*50;
+  const g=ctx.createRadialGradient(w/2,h/2,0,w/2,h/2,r);
+  g.addColorStop(0,"rgba(255,255,200,0.35)");
+  g.addColorStop(0.3,"rgba(255,215,100,0.15)");
+  g.addColorStop(1,"rgba(0,0,0,0)");
+  ctx.fillStyle=g;
+  ctx.beginPath();
+  ctx.arc(w/2,h/2,r,0,Math.PI*2);
+  ctx.fill();
+}
+
 function drawParticles(){
   ctx.fillStyle="rgba(255,215,120,0.8)";
   particles.forEach(p=>{
-    p.angle += p.speed;
-    const x = w/2 + Math.cos(p.angle)*p.radius;
-    const y = h/2 + Math.sin(p.angle)*p.radius;
-
+    p.a+=p.s;
+    const x=w/2+Math.cos(p.a)*p.r;
+    const y=h/2+Math.sin(p.a)*p.r;
     ctx.beginPath();
     ctx.arc(x,y,p.size,0,Math.PI*2);
     ctx.fill();
   });
 }
 
+function drawMusicNotes(){
+  ctx.fillStyle="rgba(255,215,120,0.7)";
+  musicNotes.forEach(n=>{
+    n.y-=n.speed;
+    if(n.y<-50){
+      n.y=h+50;
+      n.x=Math.random()*w;
+    }
+    ctx.font=n.size+"px Cinzel";
+    ctx.fillText(n.char,n.x,n.y);
+  });
+}
+
 function drawText(){
-  if(textAlpha < 1) textAlpha += 0.005;
-  if(textScale < 1) textScale += 0.002;
+  if(textAlpha<1) textAlpha+=0.004;
+  if(textScale<1) textScale+=0.002;
 
   ctx.save();
-  ctx.globalAlpha = textAlpha;
   ctx.translate(w/2,h/2);
   ctx.scale(textScale,textScale);
-
+  ctx.globalAlpha=textAlpha;
   ctx.textAlign="center";
-  ctx.font="600 "+Math.floor(w*0.065)+"px Cinzel";
-  ctx.fillStyle="#d4af37";
+
+  const glow=30+Math.sin(t*0.05)*10;
   ctx.shadowColor="#ffd700";
-  ctx.shadowBlur=40;
+  ctx.shadowBlur=glow;
+  ctx.fillStyle="#d4af37";
+
+  const mainFont=Math.floor(w*0.06);
+  const subFont=Math.floor(w*0.028);
+
+  // claves animadas
+  const offset=300+Math.sin(t*0.01)*20;
+  ctx.font=mainFont+"px Cinzel";
+  ctx.fillText("𝄞",-offset,-20);
+  ctx.fillText("𝄞",offset,-20);
+
+  // nombre
   ctx.fillText("J. CARLOS CAMPOS",0,-20);
 
-  ctx.font=Math.floor(w*0.03)+"px Cinzel";
+  ctx.font=subFont+"px Cinzel";
   ctx.shadowBlur=20;
   ctx.fillText("Compositor & Letrista",0,50);
 
@@ -109,10 +149,12 @@ function animate(){
   ctx.fillRect(0,0,w,h);
 
   drawSpotlights();
+  drawLensFlare();
   drawParticles();
+  drawMusicNotes();
   drawText();
 
-  time++;
+  t++;
   requestAnimationFrame(animate);
 }
 
