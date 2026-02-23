@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <title>J. Carlos Campos</title>
+
+<!-- Fuente cinematográfica -->
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600&display=swap" rel="stylesheet">
+
 <style>
 html,body{
 margin:0;
@@ -29,77 +33,86 @@ function resize(){
 window.addEventListener("resize",resize);
 resize();
 
-// Partículas
-const particles=[];
-const particleCount=400;
+let time = 0;
 
-for(let i=0;i<particleCount;i++){
+// Partículas en espiral
+const particles=[];
+const count=500;
+
+for(let i=0;i<count;i++){
   particles.push({
-    x:Math.random()*w,
-    y:Math.random()*h,
-    vx:(Math.random()-0.5)*0.3,
-    vy:(Math.random()-0.5)*0.3,
-    r:Math.random()*2+1
+    angle: Math.random()*Math.PI*2,
+    radius: Math.random()*Math.min(w,h)/2,
+    speed: 0.001 + Math.random()*0.002,
+    size: Math.random()*2+0.5
   });
 }
 
-let t=0;
+// Animación texto
+let textAlpha = 0;
+let textScale = 0.8;
 
-function drawText(){
-  ctx.save();
-  ctx.font="bold "+Math.floor(w*0.06)+"px serif";
-  ctx.textAlign="center";
-  ctx.fillStyle="#d4af37";
-  ctx.shadowColor="#ffd700";
-  ctx.shadowBlur=30;
-  ctx.fillText("J. CARLOS CAMPOS", w/2, h/2-20);
-
-  ctx.font=Math.floor(w*0.03)+"px serif";
-  ctx.shadowBlur=15;
-  ctx.fillText("Compositor & Letrista", w/2, h/2+40);
-  ctx.restore();
-}
-
-function drawLights(){
+function drawSpotlights(){
   for(let i=0;i<3;i++){
-    const x = w/2 + Math.sin(t*0.002+i*2)*300;
-    const y = h/2 + Math.cos(t*0.002+i*2)*200;
+    const x = w/2 + Math.sin(time*0.001+i*2)*400;
+    const y = h/2 + Math.cos(time*0.001+i*2)*200;
 
-    const grd = ctx.createRadialGradient(x,y,0,x,y,300);
-    grd.addColorStop(0,"rgba(255,215,0,0.25)");
+    const grd = ctx.createRadialGradient(x,y,0,x,y,500);
+    grd.addColorStop(0,"rgba(255,215,100,0.25)");
+    grd.addColorStop(0.4,"rgba(255,200,50,0.1)");
     grd.addColorStop(1,"rgba(0,0,0,0)");
-    ctx.fillStyle=grd;
+    ctx.fillStyle = grd;
     ctx.beginPath();
-    ctx.arc(x,y,300,0,Math.PI*2);
+    ctx.arc(x,y,500,0,Math.PI*2);
     ctx.fill();
   }
 }
 
 function drawParticles(){
-  ctx.fillStyle="rgba(255,215,0,0.8)";
+  ctx.fillStyle="rgba(255,215,120,0.8)";
   particles.forEach(p=>{
-    p.x+=p.vx;
-    p.y+=p.vy;
-
-    if(p.x<0||p.x>w) p.vx*=-1;
-    if(p.y<0||p.y>h) p.vy*=-1;
+    p.angle += p.speed;
+    const x = w/2 + Math.cos(p.angle)*p.radius;
+    const y = h/2 + Math.sin(p.angle)*p.radius;
 
     ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+    ctx.arc(x,y,p.size,0,Math.PI*2);
     ctx.fill();
   });
 }
 
+function drawText(){
+  if(textAlpha < 1) textAlpha += 0.005;
+  if(textScale < 1) textScale += 0.002;
+
+  ctx.save();
+  ctx.globalAlpha = textAlpha;
+  ctx.translate(w/2,h/2);
+  ctx.scale(textScale,textScale);
+
+  ctx.textAlign="center";
+  ctx.font="600 "+Math.floor(w*0.065)+"px Cinzel";
+  ctx.fillStyle="#d4af37";
+  ctx.shadowColor="#ffd700";
+  ctx.shadowBlur=40;
+  ctx.fillText("J. CARLOS CAMPOS",0,-20);
+
+  ctx.font=Math.floor(w*0.03)+"px Cinzel";
+  ctx.shadowBlur=20;
+  ctx.fillText("Compositor & Letrista",0,50);
+
+  ctx.restore();
+}
+
 function animate(){
-  ctx.clearRect(0,0,w,h);
   ctx.fillStyle="black";
   ctx.fillRect(0,0,w,h);
 
-  drawLights();
+  drawSpotlights();
   drawParticles();
   drawText();
 
-  t++;
+  time++;
   requestAnimationFrame(animate);
 }
 
